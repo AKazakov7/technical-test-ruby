@@ -1,6 +1,6 @@
 import pandas as pd
+import psycopg2
 from collections import OrderedDict
-
 
 def order_list_dic(items, key_orders):
     for i in range(len(items)):
@@ -16,19 +16,47 @@ def itemise_df(df):
         for i in items_values:
             if df[(df["items"] == i) & (df['packages'] == k)].empty:
                 continue
-            item = {'packageID' : k, 'itemID' : i, 'warranty' : 'NO', 'duration' : 0, 'ref' : ""}
+            item = {'packageID' : k, 'itemID' : i, 'warranty' : 'NO', 'duration' : 0, 'ref' : "", 'name' : "", 'price': 0}
             dic = df[(df["items"] == i) & (df['packages'] == k)].to_dict(orient='records')
             for elt in dic:
                 item[f'{elt['lables']}'] = elt['values']
             items.append(item)
     return items
 
-df = pd.read_excel('Orders.xlsx')
+file = 'Orders.xlsx'
+files = pd.read_excel(file, sheet_name=None)
 
-items = itemise_df(df)
+for file_name, df in files.items():
 
-key_orders = ["itemID", "name", "price", "ref", "packageID", "warranty", "duration"]
-order_list_dic(items, key_orders)
+    items = itemise_df(df)
 
-for it in items:
-    print(it)
+    key_orders = ["itemID", "name", "price", "ref", "packageID", "warranty", "duration"]
+    order_list_dic(items, key_orders)
+
+    print(file_name)
+    for it in items:
+        print(it)
+    print()
+
+try:
+    connection = psycopg2.connect(
+        dbname = "due",
+        user = "due",
+        password = "due",
+        host = "localhost",
+        port = "5432"
+    )
+
+    print("Opening new connection")
+
+    cursor = connection.cursor()
+
+
+
+except Exception as e:
+    print(e)
+
+finally:
+    if connection:
+        connection.close()
+    
