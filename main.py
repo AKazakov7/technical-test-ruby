@@ -2,6 +2,7 @@ import pandas as pd
 import psycopg2
 from collections import OrderedDict
 
+
 def order_list_dic(items, key_orders):
     for i in range(len(items)):
         items[i] = OrderedDict((key, items[i][key]) for key in key_orders)
@@ -121,4 +122,5 @@ finally:
     if connection:
         cursor.close()
         connection.close()
+        print("Close connection")
     
